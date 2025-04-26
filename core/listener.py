@@ -1,3 +1,4 @@
+import contextlib
 from threading import Thread, Event
 from queue import Queue
 import time
@@ -11,16 +12,15 @@ def check_connection(brokers: list[str], topic_feedback: str, timeout: int = 20)
     def listener(broker: str):
         def on_message(client: Client, userdata, msg: MQTTMessage):
             payload = msg.payload.decode().strip()
-            if payload == "PING:ONLINE":
-                if not done_event.is_set():
-                    result_queue.put(broker)
-                    done_event.set()
-                    client.disconnect()
+            if payload == "PING:ONLINE" and not done_event.is_set():
+                result_queue.put(broker)
+                done_event.set()
+                client.disconnect()
 
         client = Client()
         client.on_message = on_message
 
-        try:
+        with contextlib.suppress(Exception):
             client.connect(broker, 1883, 60)
             client.subscribe(topic_feedback)
             client.loop_start()
@@ -31,13 +31,11 @@ def check_connection(brokers: list[str], topic_feedback: str, timeout: int = 20)
 
             client.loop_stop()
             client.disconnect()
-        except:
-            pass
 
     for broker in brokers:
         Thread(target=listener, args=(broker,), daemon=True).start()
     try:
         broker_found = result_queue.get(timeout=timeout)
         return broker_found
-    except:
+    except Exception:
         return None
