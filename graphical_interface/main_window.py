@@ -12,9 +12,9 @@ from core.sender import send_wol_command
 ctypes.windll.shcore.SetProcessDpiAwareness(2)
 
 MQTT_BROKERS = ["mqtt.eclipseprojects.io", "broker.emqx.io", "broker.hivemq.com"]
-TOPIC_COMMAND = "pcgameresp8266/wol"
-TOPIC_PING = "pcgameresp8266/ping"
-TOPIC_FEEDBACK = "pcgameresp8266/feedback"
+TOPIC_COMMAND = "exampleWakeOnLan/wol"
+TOPIC_PING = "exampleWakeOnLan/ping"
+TOPIC_FEEDBACK = "exampleWakeOnLan/feedback"
 
 class App(Tk):
     def __init__(self):
